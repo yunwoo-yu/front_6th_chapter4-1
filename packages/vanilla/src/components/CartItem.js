@@ -1,12 +1,8 @@
-/**
- * 개별 장바구니 아이템 컴포넌트
- */
 export function CartItem({ id, title, image, price, quantity, selected }) {
   const subtotal = price * quantity;
 
   return `
     <div class="flex items-center py-3 border-b border-gray-100 cart-item" data-product-id="${id}">
-      <!-- 선택 체크박스 -->
       <label class="flex items-center mr-3">
         <input type="checkbox" 
                ${selected ? "checked" : ""}
@@ -15,7 +11,6 @@ export function CartItem({ id, title, image, price, quantity, selected }) {
                data-product-id="${id}">
       </label>
       
-      <!-- 상품 이미지 -->
       <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden mr-3 flex-shrink-0">
         <img src="${image}" 
              alt="${title}" 
@@ -23,7 +18,6 @@ export function CartItem({ id, title, image, price, quantity, selected }) {
              data-product-id="${id}">
       </div>
       
-      <!-- 상품 정보 -->
       <div class="flex-1 min-w-0">
         <h4 class="text-sm font-medium text-gray-900 truncate cursor-pointer cart-item-title"
             data-product-id="${id}">
@@ -33,7 +27,6 @@ export function CartItem({ id, title, image, price, quantity, selected }) {
           ${price.toLocaleString()}원
         </p>
         
-        <!-- 수량 조절 -->
         <div class="flex items-center mt-2">
           <button class="quantity-decrease-btn w-7 h-7 flex items-center justify-center 
                          border border-gray-300 rounded-l-md bg-gray-50 hover:bg-gray-100"
@@ -61,7 +54,6 @@ export function CartItem({ id, title, image, price, quantity, selected }) {
         </div>
       </div>
       
-      <!-- 가격 및 삭제 -->
       <div class="text-right ml-3">
         <p class="text-sm font-medium text-gray-900">
           ${subtotal.toLocaleString()}원

@@ -220,7 +220,6 @@ export function registerProductDetailEvents() {
     const product = productState.currentProduct;
 
     if (product) {
-      console.log("🛒 상품 상세 페이지에서 장바구니 추가:", product);
       addToCart(product, quantity);
     }
   });
@@ -232,19 +231,15 @@ export function registerProductDetailEvents() {
 export function registerCartEvents() {
   // 장바구니에 상품 추가 (상품 목록에서)
   addEvent("click", ".add-to-cart-btn", async (e) => {
-    console.log("🛒 장바구니 추가 버튼 클릭됨", e.target);
     const productId = e.target.getAttribute("data-product-id");
-    console.log("🛒 상품 ID:", productId);
     if (!productId) return;
 
     // 상품 정보 찾기
     const productState = productStore.getState();
     const product = productState.products.find((p) => p.productId === productId);
 
-    console.log("🛒 찾은 상품:", product);
     if (product) {
       addToCart(product, 1);
-      console.log("🛒 장바구니 추가 완료");
     }
   });
 

@@ -1,8 +1,5 @@
 import { CartItem } from "./CartItem";
 
-/**
- * 장바구니 모달 컴포넌트
- */
 export function CartModal({ items = [], selectedAll = false, isOpen = false }) {
   if (!isOpen) {
     return "";

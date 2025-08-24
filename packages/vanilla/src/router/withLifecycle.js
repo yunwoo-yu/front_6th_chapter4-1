@@ -31,8 +31,6 @@ const mount = (page) => {
   const lifecycle = getPageLifecycle(page);
   if (lifecycle.mounted) return;
 
-  console.log(`🚀 페이지 마운트:`, page.name);
-
   // 마운트 콜백들 실행
   lifecycle.mount?.();
   lifecycle.mounted = true;
@@ -44,8 +42,6 @@ const unmount = (pageFunction) => {
   const lifecycle = getPageLifecycle(pageFunction);
 
   if (!lifecycle.mounted) return;
-
-  console.log(`🔻 페이지 언마운트:`, pageFunction.name);
 
   // 언마운트 콜백들 실행
   lifecycle.unmount?.();
@@ -86,7 +82,6 @@ export const withLifecycle = ({ onMount, onUnmount, watches } = {}, page) => {
         const newDeps = getDeps();
 
         if (depsChanged(newDeps, lifecycle.deps[index])) {
-          console.log(`📊 의존성 변경 감지 (${page.name}):`, lifecycle.deps[index], "→", newDeps);
           callback();
         }
 

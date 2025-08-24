@@ -33,19 +33,14 @@ export const registerGlobalEvents = (() => {
   let initialized = false;
   return () => {
     if (initialized) {
-      console.log("⚠️ 전역 이벤트가 이미 등록되었습니다.");
       return;
     }
 
-    console.log("🔧 전역 이벤트 리스너 등록 중...");
-
     Object.keys(eventHandlers).forEach((eventType) => {
       document.body.addEventListener(eventType, handleGlobalEvents);
-      console.log(`✅ ${eventType} 이벤트 리스너 등록됨`);
     });
 
     initialized = true;
-    console.log("✅ 전역 이벤트 리스너 등록 완료");
   };
 })();
 
@@ -61,5 +56,4 @@ export const addEvent = (eventType, selector, handler) => {
   }
 
   eventHandlers[eventType][selector] = handler;
-  console.log(`📝 이벤트 등록: ${eventType} - ${selector}`);
 };

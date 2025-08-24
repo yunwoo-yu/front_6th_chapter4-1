@@ -18,7 +18,6 @@ export const HomePage = withLifecycle(
     ],
   },
   () => {
-    console.log("🏠 홈 페이지 로드");
     const productState = productStore.getState();
     const { search: searchQuery, limit, sort, category1, category2 } = router.query;
     const { products, loading, error, totalCount, categories } = productState;
