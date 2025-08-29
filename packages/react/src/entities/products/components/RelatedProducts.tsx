@@ -19,7 +19,7 @@ export default function RelatedProducts() {
               key={relatedProduct.productId}
               className="bg-gray-50 rounded-lg p-3 related-product-card cursor-pointer"
               data-product-id={relatedProduct.productId}
-              onClick={() => router.push(`/product/${relatedProduct.productId}`)}
+              onClick={() => router.push(`/product/${relatedProduct.productId}/`)}
             >
               <div className="aspect-square bg-white rounded-md overflow-hidden mb-2">
                 <img

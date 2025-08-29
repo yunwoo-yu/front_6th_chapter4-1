@@ -14,7 +14,7 @@ const retry = async () => {
 
 const goToDetailPage = async (productId: string) => {
   // 상품 상세 페이지로 이동
-  router.push(`/product/${productId}`);
+  router.push(`/product/${productId}/`);
 };
 
 /**
