@@ -3,7 +3,9 @@ const getBaseUrl = () => {
   if (typeof window !== "undefined") {
     return ""; // 브라우저에서는 상대 경로 사용
   }
-  return "http://localhost:5174"; // 서버에서는 절대 경로 사용
+  const prod = process.env.NODE_ENV === "production";
+
+  return prod ? "http://localhost:4174" : "http://localhost:5174"; // 서버에서는 절대 경로 사용
 };
 
 export async function getProducts(params = {}) {

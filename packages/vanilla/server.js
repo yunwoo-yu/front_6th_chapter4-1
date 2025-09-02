@@ -7,7 +7,7 @@ import { mockServer } from "./src/mocks/server-mock.js";
 const prod = process.env.NODE_ENV === "production";
 const port = process.env.PORT || 5173;
 const base = process.env.BASE || (prod ? "/front_6th_chapter4-1/vanilla/" : "/");
-const templateHtml = prod ? fs.readFile("dist/vanilla/index.html", "utf-8") : "";
+const templateHtml = prod ? await fs.readFile("dist/vanilla/index.html", "utf-8") : "";
 const app = express();
 let vite;
 
@@ -30,7 +30,7 @@ if (!prod) {
   app.use(base, sirv("dist/vanilla", { extensions: [] }));
 }
 
-app.get("*all", async (req, res) => {
+app.get(/^(?!\/api).*/, async (req, res) => {
   try {
     let template;
     let render;
@@ -61,5 +61,5 @@ app.get("*all", async (req, res) => {
 
 // Start http server
 app.listen(port, () => {
-  console.log(`React Server started at http://localhost:${port}`);
+  console.log(`Server started at http://localhost:${port}${base}`);
 });

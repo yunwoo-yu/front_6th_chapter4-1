@@ -34,9 +34,9 @@ const mount = (page) => {
   // 마운트 콜백들 실행
   if (typeof window !== "undefined") {
     lifecycle.mount?.();
+    lifecycle.mounted = true;
+    lifecycle.deps = [];
   }
-  lifecycle.mounted = true;
-  lifecycle.deps = [];
 };
 
 // 페이지 언마운트 처리
