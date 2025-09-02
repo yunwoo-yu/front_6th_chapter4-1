@@ -3,13 +3,17 @@ import express from "express";
 import fs from "node:fs/promises";
 import { createServer } from "vite";
 import sirv from "sirv";
-
+import { mockServer } from "./src/mocks/server-mock.js";
 const prod = process.env.NODE_ENV === "production";
 const port = process.env.PORT || 5173;
 const base = process.env.BASE || (prod ? "/front_6th_chapter4-1/vanilla/" : "/");
 const templateHtml = prod ? fs.readFile("dist/vanilla/index.html", "utf-8") : "";
 const app = express();
 let vite;
+
+mockServer.listen({
+  onUnhandledRequest: "bypass", // 처리되지 않은 요청은 통과
+});
 
 if (!prod) {
   vite = await createServer({
@@ -41,8 +45,10 @@ app.get("*all", async (req, res) => {
     }
 
     const rendered = await render(req.originalUrl, req.query);
+
     const html = template
       .replace(`<!--app-head-->`, rendered.head ?? "")
+      .replace(`<!--app-data-->`, `<script>window.__INITIAL_DATA__ = ${rendered.data}</script>`)
       .replace(`<!--app-html-->`, rendered.html ?? "");
 
     res.status(200).set({ "Content-Type": "text/html" }).send(html);

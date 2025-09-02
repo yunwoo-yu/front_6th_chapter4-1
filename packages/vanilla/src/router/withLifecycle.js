@@ -32,7 +32,9 @@ const mount = (page) => {
   if (lifecycle.mounted) return;
 
   // 마운트 콜백들 실행
-  lifecycle.mount?.();
+  if (typeof window !== "undefined") {
+    lifecycle.mount?.();
+  }
   lifecycle.mounted = true;
   lifecycle.deps = [];
 };
