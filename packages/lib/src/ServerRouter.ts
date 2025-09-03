@@ -1,20 +1,37 @@
-export class ServerRouter {
-  #routes;
-  #route;
-  #baseUrl;
-  #currentQuery = {};
+import type { AnyFunction, StringRecord } from "./types";
+import { createObserver } from "./createObserver";
+
+interface Route<Handler extends AnyFunction> {
+  regex: RegExp;
+  paramNames: string[];
+  handler: Handler;
+  params?: StringRecord;
+}
+
+type QueryPayload = Record<string, string | number | undefined>;
+
+export type RouterInstance<T extends AnyFunction> = InstanceType<typeof ServerRouter<T>>;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class ServerRouter<Handler extends (...args: any[]) => any> {
+  readonly #routes: Map<string, Route<Handler>>;
+  readonly #observer = createObserver();
+  readonly #baseUrl;
+  #currentQuery: StringRecord;
+  #route: null | (Route<Handler> & { params: StringRecord; path: string });
 
   constructor(baseUrl = "") {
     this.#routes = new Map();
     this.#route = null;
     this.#baseUrl = baseUrl.replace(/\/$/, "");
+    this.#currentQuery = {};
   }
 
-  get query() {
+  get query(): StringRecord {
     return this.#currentQuery;
   }
 
-  set query(newQuery) {
+  set query(newQuery: QueryPayload) {
     const newUrl = ServerRouter.getUrl(newQuery, this.#baseUrl);
     this.push(newUrl);
   }
@@ -31,14 +48,9 @@ export class ServerRouter {
     return this.#route?.handler;
   }
 
-  /**
-   * 라우트 등록
-   * @param {string} path - 경로 패턴 (예: "/product/:id")
-   * @param {Function} handler - 라우트 핸들러
-   */
-  addRoute(path, handler) {
+  addRoute(path: string, handler: Handler) {
     // 경로 패턴을 정규식으로 변환
-    const paramNames = [];
+    const paramNames: string[] = [];
     const regexPath = path
       .replace(/:\w+/g, (match) => {
         paramNames.push(match.slice(1)); // ':id' -> 'id'
@@ -61,7 +73,7 @@ export class ServerRouter {
       const match = pathname.match(route.regex);
       if (match) {
         // 매치된 파라미터들을 객체로 변환
-        const params = {};
+        const params: StringRecord = {};
         route.paramNames.forEach((name, index) => {
           params[name] = match[index + 1];
         });
@@ -76,48 +88,33 @@ export class ServerRouter {
     return null;
   }
 
-  /**
-   * 네비게이션 실행
-   * @param {string} url - 이동할 경로
-   */
-  push(url = "/") {
+  push(url: string = "/") {
     try {
-      // baseUrl이 없으면 자동으로 붙여줌
-
       this.#route = this.#findRoute(url);
     } catch (error) {
       console.error("라우터 네비게이션 오류:", error);
     }
   }
 
-  /**
-   * 라우터 시작
-   */
   start(url = "/", query = {}) {
-    this.#currentQuery = query;
     this.#route = this.#findRoute(url);
+    this.#currentQuery = query;
   }
 
-  /**
-   * 쿼리 파라미터를 객체로 파싱
-   * @param {string} search - location.search 또는 쿼리 문자열
-   * @returns {Object} 파싱된 쿼리 객체
-   */
-  static parseQuery = (search) => {
+  subscribe = (listener: () => void) => {
+    return this.#observer.subscribe(listener);
+  };
+
+  static parseQuery = (search: string = "") => {
     const params = new URLSearchParams(search);
-    const query = {};
+    const query: StringRecord = {};
     for (const [key, value] of params) {
       query[key] = value;
     }
     return query;
   };
 
-  /**
-   * 객체를 쿼리 문자열로 변환
-   * @param {Object} query - 쿼리 객체
-   * @returns {string} 쿼리 문자열
-   */
-  static stringifyQuery = (query) => {
+  static stringifyQuery = (query: QueryPayload) => {
     const params = new URLSearchParams();
     for (const [key, value] of Object.entries(query)) {
       if (value !== null && value !== undefined && value !== "") {
@@ -127,7 +124,7 @@ export class ServerRouter {
     return params.toString();
   };
 
-  static getUrl = (newQuery, pathname = "/", baseUrl = "") => {
+  static getUrl = (newQuery: QueryPayload, pathname = "/", baseUrl = "") => {
     const currentQuery = ServerRouter.parseQuery();
     const updatedQuery = { ...currentQuery, ...newQuery };
 
