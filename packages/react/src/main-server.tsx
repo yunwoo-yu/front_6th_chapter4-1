@@ -23,6 +23,7 @@ export const render = async (url: string, query: Record<string, string>) => {
   router.start(url, query);
 
   const route = router.route;
+
   if (!route) {
     return { html: NotFoundPage(), head: "<title>페이지를 찾을 수 없습니다</title>", data: JSON.stringify({}) };
   }
