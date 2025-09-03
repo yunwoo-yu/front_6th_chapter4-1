@@ -2,19 +2,21 @@ import express from "express";
 import fs from "node:fs/promises";
 import sirv from "sirv";
 import compression from "compression";
+import { mockServer } from "../vanilla/src/mocks/server-mock.js";
+import { createServer } from "vite";
 
 const prod = process.env.NODE_ENV === "production";
 const port = process.env.PORT || 5174;
+const templateHtml = prod ? await fs.readFile("./dist/react/index.html", "utf-8") : "";
 const base = process.env.BASE || (prod ? "/front_6th_chapter4-1/react/" : "/");
-
 const app = express();
 let vite;
 
-const templateHtml = prod ? await fs.readFile("./dist/react/index.html", "utf-8") : "";
+mockServer.listen({
+  onUnhandledRequest: "bypass", // 처리되지 않은 요청은 통과
+});
 
 if (!prod) {
-  const { createServer } = await import("vite");
-
   vite = await createServer({
     server: { middlewareMode: true },
     appType: "custom",
@@ -27,26 +29,25 @@ if (!prod) {
   app.use(base, sirv("./dist/react", { extensions: [] }));
 }
 
-app.get("*all", async (req, res) => {
+app.get(/^(?!.*\/api).*/, async (req, res) => {
   try {
-    const url = req.originalUrl.replace(base, "");
     let template;
     let render;
 
     if (!prod) {
-      // Always read fresh template in development
       template = await fs.readFile("./index.html", "utf-8");
-      template = await vite.transformIndexHtml(url, template);
+      template = await vite.transformIndexHtml(req.originalUrl, template);
       render = (await vite.ssrLoadModule("/src/main-server.tsx")).render;
     } else {
       template = templateHtml;
       render = (await import("./dist/react-ssr/main-server.js")).render;
     }
 
-    const rendered = await render(url, req.query);
+    const rendered = await render(req.originalUrl, req.query);
 
     const html = template
       .replace(`<!--app-head-->`, rendered.head ?? "")
+      .replace(`<!--app-data-->`, `<script>window.__INITIAL_DATA__ = ${rendered.data}</script>`)
       .replace(`<!--app-html-->`, rendered.html ?? "");
 
     res.status(200).set({ "Content-Type": "text/html" }).send(html);
@@ -59,5 +60,5 @@ app.get("*all", async (req, res) => {
 
 // Start http server
 app.listen(port, () => {
-  console.log(`React Server started at http://localhost:${port}`);
+  console.log(`React Server started at http://localhost:${port}${base}`);
 });

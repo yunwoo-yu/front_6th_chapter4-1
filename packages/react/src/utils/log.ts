@@ -1,8 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
+import type { Product, Categories } from "../entities/products/types";
 declare global {
   interface Window {
     __spyCalls: any[];
     __spyCallsClear: () => void;
+    __INITIAL_DATA__?: {
+      products: Product[];
+      categories: Categories;
+      totalCount: number;
+      product: Product | null;
+      relatedProducts: Product[];
+      error: string | null;
+    };
+    __HYDRATED__?: boolean;
   }
 }
 
