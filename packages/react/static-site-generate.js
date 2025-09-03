@@ -12,7 +12,9 @@ const { mockServer } = await vite.ssrLoadModule("./src/mocks/serverMock.ts");
 
 const { render } = await vite.ssrLoadModule("./src/main-server.tsx");
 
-const BASE = "/front_6th_chapter4-1/react/";
+// 렌더링 시 라우터는 개발 모드(middlewareMode)로 동작하므로 BASE 없이 절대 경로로 렌더해야
+// 매칭이 정상적으로 이루어진다. (배포 산출물의 asset 경로는 템플릿이 처리)
+const BASE = "/";
 
 async function writeRoute(url, template, outFile) {
   const { html, head, data } = await render(url, {});
@@ -32,6 +34,10 @@ async function generateStaticSite() {
   });
 
   try {
+    // 1) 홈 페이지 생성
+    await writeRoute(`${BASE}`, template, templatePath);
+
+    // 2) 주요 상품 상세 페이지들 생성
     const productIds = items.slice(100, 130).map((p) => p.productId);
     productIds.push(items.find((product) => product.productId === "86940857379").productId);
 

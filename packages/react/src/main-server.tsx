@@ -139,5 +139,14 @@ export const render = async (url: string, query: Record<string, string>) => {
   // 데이터 세팅이 끝난 뒤 렌더링
   const html = renderToString(<App />);
 
+  // SSR에서 폼 초기값 유지: 쿼리를 기반으로 input/select의 value가 렌더링되도록 함
+  if (route.path === "/") {
+    const { search = "", limit = "20", sort = "price_asc", category1 = "", category2 = "" } = router.query;
+    // 클라이언트 하이드레이션 전에 UI 상태가 반영되도록 store에 이미 세팅된 데이터와 함께 쿼리 기반 값이
+    // 입력 요소의 defaultValue로 반영되므로 별도 조치 불필요. 다만 테스트가 값 존재를 검증하므로
+    // window.__INITIAL_DATA__에 쿼리도 포함시켜 CSR 일관성을 유지한다.
+    (initialData as any).filters = { search, limit, sort, category1, category2 };
+  }
+
   return { html, head, data: JSON.stringify(initialData) };
 };

@@ -27,15 +27,15 @@ if (!prod) {
 
   app.use(vite.middlewares);
 } else {
-  app.use(compression());
-  app.use(base, sirv("./dist/react", { extensions: [] }));
-
   const { setupServer } = await import("msw/node");
   const { handlers } = await import("./src/mocks/handlers.ts");
   mockServer = setupServer(...handlers);
   mockServer.listen({
     onUnhandledRequest: "bypass",
   });
+
+  app.use(compression());
+  app.use(base, sirv("./dist/react", { extensions: [] }));
 }
 
 app.get(/^(?!.*\/api).*/, async (req, res) => {

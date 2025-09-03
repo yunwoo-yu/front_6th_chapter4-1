@@ -32,7 +32,8 @@ export class ServerRouter<Handler extends (...args: any[]) => any> {
   }
 
   set query(newQuery: QueryPayload) {
-    const newUrl = ServerRouter.getUrl(newQuery, this.#baseUrl);
+    const pathname = this.#route?.path ?? "/";
+    const newUrl = ServerRouter.getUrl(newQuery, pathname, this.#baseUrl);
     this.push(newUrl);
   }
 
