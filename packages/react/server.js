@@ -2,7 +2,6 @@ import express from "express";
 import fs from "node:fs/promises";
 import sirv from "sirv";
 import compression from "compression";
-import { mockServer } from "../vanilla/src/mocks/server-mock.js";
 import { createServer } from "vite";
 
 const prod = process.env.NODE_ENV === "production";
@@ -10,11 +9,8 @@ const port = process.env.PORT || 5174;
 const templateHtml = prod ? await fs.readFile("./dist/react/index.html", "utf-8") : "";
 const base = process.env.BASE || (prod ? "/front_6th_chapter4-1/react/" : "/");
 const app = express();
-let vite;
-
-mockServer.listen({
-  onUnhandledRequest: "bypass", // 처리되지 않은 요청은 통과
-});
+let vite = await import("vite");
+let mockServer;
 
 if (!prod) {
   vite = await createServer({
@@ -22,11 +18,24 @@ if (!prod) {
     appType: "custom",
     base,
   });
+  const { mockServer: msw } = await vite.ssrLoadModule("./src/mocks/serverMock.ts");
+
+  mockServer = msw;
+  mockServer.listen({
+    onUnhandledRequest: "bypass", // 처리되지 않은 요청은 통과
+  });
 
   app.use(vite.middlewares);
 } else {
   app.use(compression());
   app.use(base, sirv("./dist/react", { extensions: [] }));
+
+  const { setupServer } = await import("msw/node");
+  const { handlers } = await import("./src/mocks/handlers.ts");
+  mockServer = setupServer(...handlers);
+  mockServer.listen({
+    onUnhandledRequest: "bypass",
+  });
 }
 
 app.get(/^(?!.*\/api).*/, async (req, res) => {
