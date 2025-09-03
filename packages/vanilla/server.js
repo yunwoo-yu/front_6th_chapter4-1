@@ -30,7 +30,7 @@ if (!prod) {
   app.use(base, sirv("dist/vanilla", { extensions: [] }));
 }
 
-app.get(/^(?!\/api).*/, async (req, res) => {
+app.get(/^(?!.*\/api).*/, async (req, res) => {
   try {
     let template;
     let render;
